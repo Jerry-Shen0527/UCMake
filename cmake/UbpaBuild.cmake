@@ -36,6 +36,7 @@ function(_Ubpa_ExpandSources rst _sources)
         ${item}/*.hpp
         ${item}/*.hxx
         ${item}/*.inl
+        ${item}/*.cuh
         
         # source files
         ${item}/*.c
@@ -43,6 +44,8 @@ function(_Ubpa_ExpandSources rst _sources)
         ${item}/*.cc
         ${item}/*.cpp
         ${item}/*.cxx
+
+        ${item}/*.cu
         
         # shader files
         ${item}/*.vert # glsl vertex shader
@@ -273,6 +276,19 @@ function(Ubpa_AddTarget)
     add_library("Ubpa::${targetName}" ALIAS ${targetName})
   elseif("${ARG_MODE}" STREQUAL "SHARED")
     add_library(${targetName} SHARED)
+    add_library("Ubpa::${targetName}" ALIAS ${targetName})
+  elseif("${ARG_MODE}" STREQUAL "CUDA_EXE")
+    cuda_add_executable(${targetName})
+    add_executable("Ubpa::${targetName}" ALIAS ${targetName})
+    if(MSVC)
+      set_target_properties(${targetName} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${Ubpa_RootProjectPath}/bin")
+    endif()
+    set_target_properties(${targetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+  elseif("${ARG_MODE}" STREQUAL "CUDA_STATIC")
+    cuda_add_library(${targetName} STATIC)
+    add_library("Ubpa::${targetName}" ALIAS ${targetName})
+  elseif("${ARG_MODE}" STREQUAL "CUDA_SHARED")
+    cuda_add_library(${targetName} SHARED)
     add_library("Ubpa::${targetName}" ALIAS ${targetName})
   elseif("${ARG_MODE}" STREQUAL "INTERFACE")
     add_library(${targetName} INTERFACE)
